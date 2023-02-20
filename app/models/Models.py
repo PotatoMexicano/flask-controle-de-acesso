@@ -14,9 +14,9 @@ class Image(db.Model):
 
     __tablename__ = 'images'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=False)
-    base64 = Column(String(), nullable=True)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    name:str = Column(String(45), nullable=False)
+    base64:str = Column(String(), nullable=True)
     on_create = Column(DateTime, nullable=False, default=datetime.now)
 
     id_page = Column(Integer, ForeignKey('pages.id'), nullable=False)
@@ -41,9 +41,9 @@ class Trigger(db.Model):
 
     __tablename__ = 'triggers'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=False)
-    function_trigger = Column(String(45), nullable=False)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    name:str = Column(String(45), nullable=False)
+    function_trigger:str = Column(String(45), nullable=False)
     on_create = Column(DateTime, nullable=False, default=datetime.now)
 
     id_page = Column(Integer, ForeignKey('pages.id'), nullable=False)
@@ -74,9 +74,9 @@ class Label(db.Model):
 
     __tablename__ = 'labels'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=False)
-    description = Column(String(255), nullable=False)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    name:str = Column(String(45), nullable=False)
+    description:str = Column(String(255), nullable=False)
     on_create = Column(DateTime, nullable=False, default=datetime.now)
     id_page = Column(Integer, ForeignKey('pages.id'), nullable=False)
 
@@ -107,13 +107,13 @@ class Page(db.Model):
     __tablename__ = 'pages'
     __allow_unmapped__ = True
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=False)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    name:str = Column(String(45), nullable=False)
     on_create =  Column(DateTime, nullable=False, default=datetime.now)
 
-    images = None
-    triggers = None
-    labels = None
+    images: list[Image] = None
+    triggers: list[Trigger] = None
+    labels: list[Label] = None
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -173,11 +173,11 @@ class Module(db.Model):
     __tablename__ = 'modules'
     __allow_unmapped__ = True
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=False)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    name:str = Column(String(45), nullable=False)
     on_create = Column(DateTime, nullable=False, default=datetime.now)
 
-    pages = None
+    pages: list[Page] = None
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -217,11 +217,11 @@ class Group(db.Model):
     __tablename__ = 'groups'
     __allow_unmapped__ = True
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=False)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    name:str = Column(String(45), nullable=False)
     on_create = Column(DateTime, default=datetime.now, nullable=False)
 
-    modules = None
+    modules: list[Module] = None
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -284,13 +284,13 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     __allow_unmapped__ = True
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    login = Column(String(45), nullable=False, unique=True)
+    id:int = Column(Integer, primary_key=True, autoincrement=True)
+    login:str = Column(String(45), nullable=False, unique=True)
     password = Column(String(100), nullable=False, default='default password')
     on_create = Column(DateTime, nullable=False, default=datetime.now)
     on_login = Column(DateTime, nullable=True)
 
-    grupos = None
+    grupos:list[Group] = None
     
     def __init__(self, **kwargs):
         self.login = kwargs.get('login')
