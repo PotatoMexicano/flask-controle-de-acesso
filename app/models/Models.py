@@ -111,9 +111,9 @@ class Page(db.Model):
     name:str = Column(String(45), nullable=False)
     on_create =  Column(DateTime, nullable=False, default=datetime.now)
 
-    images: list[Image] = None
-    triggers: list[Trigger] = None
-    labels: list[Label] = None
+    images = None
+    triggers = None
+    labels = None
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -177,7 +177,7 @@ class Module(db.Model):
     name:str = Column(String(45), nullable=False)
     on_create = Column(DateTime, nullable=False, default=datetime.now)
 
-    pages: list[Page] = None
+    pages = None
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -221,7 +221,7 @@ class Group(db.Model):
     name:str = Column(String(45), nullable=False)
     on_create = Column(DateTime, default=datetime.now, nullable=False)
 
-    modules: list[Module] = None
+    modules = None
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -290,7 +290,7 @@ class User(db.Model, UserMixin):
     on_create = Column(DateTime, nullable=False, default=datetime.now)
     on_login = Column(DateTime, nullable=True)
 
-    grupos:list[Group] = None
+    grupos = None
     
     def __init__(self, **kwargs):
         self.login = kwargs.get('login')
