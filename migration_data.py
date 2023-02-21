@@ -2,7 +2,7 @@ from app import app, db
 from app.models.Models import User, UserGroup, Group, Module, GroupModule, Page, ModulePage, Label, Trigger, Image
 from datetime import datetime
 
-numero_usuarios = 500
+numero_usuarios = 10
 numero_paginas = numero_usuarios * 2
 numero_elementos = numero_paginas * 2
 

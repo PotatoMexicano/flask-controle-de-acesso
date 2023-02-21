@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from flask_login import UserMixin
-
+from flask import session
 from datetime import datetime
 
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text, update, select
 import sqlalchemy.orm as orm
 from sqlalchemy import Column, String, Integer, DateTime, select, ForeignKey
 
 from app import app, db
+import pyotp
 
 @dataclass
 class Image(db.Model):
@@ -280,6 +281,8 @@ class UserGroup(db.Model):
 
 @dataclass
 class User(db.Model, UserMixin):
+
+    from app import login_manager
     
     __tablename__ = 'users'
     __allow_unmapped__ = True
@@ -287,10 +290,11 @@ class User(db.Model, UserMixin):
     id:int = Column(Integer, primary_key=True, autoincrement=True)
     login:str = Column(String(45), nullable=False, unique=True)
     password = Column(String(100), nullable=False, default='default password')
+    secret_2FA = Column(String(255), nullable=True)
     on_create = Column(DateTime, nullable=False, default=datetime.now)
     on_login = Column(DateTime, nullable=True)
 
-    grupos = None
+    grupos:list = None
     
     def __init__(self, **kwargs):
         self.login = kwargs.get('login')
@@ -320,7 +324,37 @@ class User(db.Model, UserMixin):
         response = db.session.execute(raw).all()
         response = [i[0] for i in response]
         return response
-    
+
+    def checkExist(login:str, password:str):
+
+        raw = select(User).where(User.login == login)
+        response = db.session.execute(raw).first()
+        if response:
+            session['username'] = response[0].login
+            session['password'] = password
+            session['secret_2FA'] = response[0].secret_2FA
+            return response[0]
+        
+    def authUser(username:str, password:str):
+        
+        if not username:
+            return 'parameter [username] required.'
+
+        if not password:
+            return 'parameter [password] required.'
+        
+        raw = select(User).where(User.login == username).where(User.password == password)
+
+        response = db.session.execute(raw).first()
+
+        if not response:
+            return None
+
+        response:User = response[0]
+
+        return response
+
+    @login_manager.user_loader
     def listOne(id:int = None):
 
         if not id:
@@ -336,9 +370,26 @@ class User(db.Model, UserMixin):
             return 'object not found.'
 
         response:User = response[0]
-        response.loadRelationship(grupo=True)
+        response.loadRelationship(grupo=False)
         
-        return [response]
+        return response
+    
+    def create_totp(self):
+        secret = pyotp.random_base32()
+        db.session.execute(update(User).where(User.id == self.id).values(secret_2FA = str(secret)))
+        db.session.commit()
+
+    def view_totp(self):
+        totp = pyotp.totp.TOTP(self.secret_2FA).provisioning_uri(name=f'{self.login}', issuer_name='Secure App')
+        return str(totp)
+
+    def update_last_login(self):
+        db.session.execute(update(User).where(User.id == self.id).values(on_login = datetime.now()))
+        db.session.commit()
+
+    def verify_totp(self, token) -> bool:
+        response = pyotp.TOTP(self.secret_2FA).verify(int(token))
+        return response
 
     def hasAdminRole(self):
 
